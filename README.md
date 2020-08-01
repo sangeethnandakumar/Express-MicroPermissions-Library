@@ -1,14 +1,13 @@
-## EnabledAll()
-Checks if all given permissions are available to a user
+# INDIVIDUAL PERMISSIONS
+## AllPermissions()
+Gives a list of all permission informations
 ```csharp
-var username = "sangee";
-permission.EnabledAll(username, "p.AddUser", "p.EditUser", "p.DeleteUser")
+var info = permission.AllPermissions();
 ```
-## EnabledAny()
-Checks if atleast one permissions is available to a user
+## GetPermission()
+Gives information about a specific permission
 ```csharp
-var username = "sangee";
-permission.EnabledAny(username, "p.AddUser", "p.EditUser", "p.DeleteUser")
+var info = permission.GetPermission("p.RevokeAccess");
 ```
 ## BindPermission()
 Adds a new permission to user if not exists
@@ -22,15 +21,17 @@ Removes permission from user if exists
 var username = "sangee";
 permission.UnBindPermission(username, "p.RevokeAccess");
 ```
-## GetPermission()
-Gives information about a specific permission
+## EnabledAll()
+Checks if all given permissions are binded to a user
 ```csharp
-var info = permission.GetPermission("p.RevokeAccess");
+var username = "sangee";
+permission.EnabledAll(username, "p.AddUser", "p.EditUser", "p.DeleteUser")
 ```
-## AllPermissions()
-Gives a list of all permission informations
+## EnabledAny()
+Checks if atleast one permissions is binded to a user
 ```csharp
-var info = permission.AllPermissions();
+var username = "sangee";
+permission.EnabledAny(username, "p.AddUser", "p.EditUser", "p.DeleteUser")
 ```
 ## EnabledPermissions()
 Gives a list of all binded permissions of a user
@@ -43,6 +44,13 @@ Gives a list of all non-binded permissions of a user
 ```csharp
 var username = "sangee";
 permission.DisabledPermissions(username);
+```
+  
+# PERMISSION GROUPS
+## GetPermisionGroups()
+Gives a list of all permission groups available
+```csharp
+var result = permission.GetPermisionGroups();
 ```
 ## CreatePermissionGroup()
 Creates a new permission group if not exists
@@ -63,11 +71,6 @@ UnBinds an existing permission from a permission group
 var permission = "p.AddUser";
 var permisionGroup = "g.SuperAdmin";
 permission.UnBindPermissionFromPermissionGroup(permisionGroup, permission);
-```
-## GetPermisionGroups()
-Gives a list of all permission groups available
-```csharp
-var result = permission.GetPermisionGroups();
 ```
 ## GetPermissionsFromPermissionGroup()
 Gives a list of permissions contained in a permission group

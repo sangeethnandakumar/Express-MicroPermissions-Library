@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MSSQLInfrastructure.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="MSSQLInfrastructure.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Twileloop.ExpressData" Version="1.0.0" />
   </ItemGroup>
 

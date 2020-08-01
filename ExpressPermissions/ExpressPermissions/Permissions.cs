@@ -1,6 +1,7 @@
 ﻿using ExpressData;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -23,6 +24,8 @@ namespace ExpressPermissions
 
         public void SetUpInfrastructure()
         {
+            var query = File.ReadAllText("MSSQLInfrastructure.sql");
+            SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
         }
 
         //Returns TRUE is all permissions are satisfied
@@ -36,7 +39,7 @@ namespace ExpressPermissions
                 {
                     var query = @"SELECT COUNT(A.Id) FROM tblPermissions A
                                 INNER JOIN tblPermissionBindings B ON B.PermissionId = A.Id
-                                INNER JOIN "+ _args.UserDBName + @"..tblUser C ON C.Id=B.UserId
+                                INNER JOIN "+ _args.UserDBName + @".."+ _args.UserTable + @" C ON C."+ _args.UserIdColumn + @"=B.UserId
                                 WHERE C.FName='" + username + "' AND A.IsEnabled=1 AND B.IsEnabled=1 AND A.Permission='" + permission + "'";
                     var resut = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
                     if (resut < 1)
@@ -71,9 +74,9 @@ namespace ExpressPermissions
                 }
                 var query = @"SELECT COUNT(A.Id) FROM tblPermissions A
                                 INNER JOIN tblPermissionBindings B ON B.PermissionId = A.Id
-                                INNER JOIN tblUser C ON C.Id=B.UserId
+                                INNER JOIN "+ _args.UserDBName + @".."+ _args.UserTable + @" C ON C."+ _args.UserIdColumn + @"=B.UserId
                                 WHERE C.FName='" + username + "' AND A.IsEnabled=1 AND B.IsEnabled=1 AND A.Permission IN (" + inStatement + ")";
-                var resut = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var resut = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
                 if (resut < 1)
                 {
                     isAllowed = false;
@@ -94,15 +97,15 @@ namespace ExpressPermissions
                 var userId = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
 
                 query = $"SELECT TOP(1) Id FROM tblPermissions WHERE Permission='{permission}'";
-                var permissionId = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var permissionId = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
 
                 query = $"SELECT COUNT(PermissionId) FROM tblPermissionBindings WHERE UserId={userId} AND PermissionId={permissionId}";
-                var isAlreadyExist = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var isAlreadyExist = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
 
                 if (userId > 0 && permissionId > 0 && isAlreadyExist <= 0)
                 {
                     query = $"INSERT INTO tblPermissionBindings (UserId, PermissionId, IsEnabled, LastBinded) VALUES ({userId},{permissionId},1,GETUTCDATE())";
-                    SqlHelper.Query<int>(query, _args.UserDBConnectionString);
+                    SqlHelper.Query<int>(query, _args.PermissionDBConnectionString);
                     return true;
                 }
                 return false;
@@ -120,15 +123,15 @@ namespace ExpressPermissions
                 var userId = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
 
                 query = $"SELECT TOP(1) Id FROM tblPermissions WHERE Permission='{permission}'";
-                var permissionId = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var permissionId = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
 
                 query = $"SELECT COUNT(PermissionId) FROM tblPermissionBindings WHERE UserId={userId} AND PermissionId={permissionId}";
-                var isAlreadyExist = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var isAlreadyExist = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
 
                 if (userId > 0 && permissionId > 0 && isAlreadyExist > 0)
                 {
                     query = $"DELETE FROM tblPermissionBindings WHERE UserId={userId} AND PermissionId={permissionId}";
-                    SqlHelper.Query<int>(query, _args.UserDBConnectionString);
+                    SqlHelper.Query<int>(query, _args.PermissionDBConnectionString);
                     return true;
                 }
                 return false;
@@ -143,7 +146,7 @@ namespace ExpressPermissions
             {
 
                 var query = $"SELECT TOP(1) * FROM tblPermissions WHERE Permission='{permission}'";
-                var permissionInfo = SqlHelper.Query<PermissionInfo>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var permissionInfo = SqlHelper.Query<PermissionInfo>(query, _args.PermissionDBConnectionString).FirstOrDefault();
                 return permissionInfo;
             }
             return new PermissionInfo();
@@ -155,7 +158,7 @@ namespace ExpressPermissions
             if (_args != null)
             {
                 var query = $"SELECT * FROM tblPermissions WHERE IsEnabled=1";
-                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.UserDBConnectionString);
+                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.PermissionDBConnectionString);
                 return permissionInfos;
             }
             return new List<PermissionInfo>();
@@ -168,9 +171,9 @@ namespace ExpressPermissions
             {
                 var query = @"SELECT A.* FROM tblPermissions A
                             INNER JOIN tblPermissionBindings B ON B.PermissionId = A.Id
-                            INNER JOIN " + _args.UserTable + @" C ON C." + _args.UserIdColumn + @"=B.UserId
+                            INNER JOIN "+ _args.UserDBName + ".." + _args.UserTable + @" C ON C." + _args.UserIdColumn + @"=B.UserId
                             WHERE C.FName='" + username + "' AND A.IsEnabled=1 AND B.IsEnabled=1";
-                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.UserDBConnectionString);
+                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.PermissionDBConnectionString);
                 return permissionInfos;
             }
             return new List<PermissionInfo>();
@@ -183,10 +186,10 @@ namespace ExpressPermissions
             {
                 var query = @"SELECT A.* FROM tblPermissions A WHERE Id NOT IN(
                             SELECT B.PermissionId FROM tblPermissionBindings B
-                            INNER JOIN " + _args.UserTable + @" C ON C." + _args.UserIdColumn + @"=B.UserId
+                            INNER JOIN "+ _args.UserDBName + ".." + _args.UserTable + @" C ON C." + _args.UserIdColumn + @"=B.UserId
                             WHERE C.FName='" + username + @"' AND B.IsEnabled=1
                             )";
-                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.UserDBConnectionString);
+                var permissionInfos = SqlHelper.Query<PermissionInfo>(query, _args.PermissionDBConnectionString);
                 return permissionInfos;
             }
             return new List<PermissionInfo>();
@@ -233,7 +236,7 @@ namespace ExpressPermissions
             if (_args != null)
             {
                 var query = $"SELECT COUNT(Id) FROM tblPermissionGroups WHERE Name='{name}'";
-                var isExist = SqlHelper.Query<int>(query, _args.UserDBConnectionString).FirstOrDefault();
+                var isExist = SqlHelper.Query<int>(query, _args.PermissionDBConnectionString).FirstOrDefault();
                 if (isExist < 1)
                 {
                     SqlHelper.Query<int>($"INSERT INTO tblPermissionGroups (Name, Created) VALUES ('{name}', GETUTCDATE())", _args.PermissionDBConnectionString);
@@ -294,7 +297,7 @@ namespace ExpressPermissions
             if (_args != null)
             {
                 var query = "SELECT * FROM tblPermissionGroups";
-                var result = SqlHelper.Query<PermissionGroup>(query, _args.UserDBConnectionString);
+                var result = SqlHelper.Query<PermissionGroup>(query, _args.PermissionDBConnectionString);
                 return result;
             }
             return new List<PermissionGroup>();
@@ -309,7 +312,7 @@ namespace ExpressPermissions
                             INNER JOIN tblPermissionGroupBindings B ON B.PermissionGroupId=A.Id
                             INNER JOIN tblPermissions C ON C.Id=B.PermisssionId
                             WHERE A.Name='"+ name +"' AND C.IsEnabled=1";
-                var result = SqlHelper.Query<PermissionInfo>(query, _args.UserDBConnectionString);
+                var result = SqlHelper.Query<PermissionInfo>(query, _args.PermissionDBConnectionString);
                 return result;
             }
             return new List<PermissionInfo>();
@@ -327,7 +330,7 @@ namespace ExpressPermissions
 
                 foreach (var permission in requiredPermissions)
                 {
-                    BindPermissions(username, permission.Permission);
+                    BindPermission(username, permission.Permission);
                 }             
                 
                 return true;
@@ -346,7 +349,7 @@ namespace ExpressPermissions
 
                     foreach (var permission in groupPermissions)
                     {
-                        UnBindPermissions(username, permission.Permission);
+                        UnBindPermission(username, permission.Permission);
                     }
 
                     return true;

@@ -1,3 +1,4 @@
+---
 # INDIVIDUAL PERMISSIONS
 ## AllPermissions()
 Gives a list of all permission informations
@@ -45,7 +46,7 @@ Gives a list of all non-binded permissions of a user
 var username = "sangee";
 permission.DisabledPermissions(username);
 ```
-  
+---
 # PERMISSION GROUPS
 ## GetPermisionGroups()
 Gives a list of all permission groups available

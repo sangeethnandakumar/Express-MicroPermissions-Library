@@ -46,6 +46,10 @@ Gives a list of all non-binded permissions of a user
 var username = "sangee";
 permission.DisabledPermissions(username);
 ```
+## Exist()
+Checks if a permission exists in global scope
+```csharp
+var isExist = permission.Exist("p.AddUser");
 ---
 # PERMISSION GROUPS
 ## GetPermisionGroups()
@@ -73,6 +77,13 @@ var permission = "p.AddUser";
 var permisionGroup = "g.SuperAdmin";
 permission.UnBindPermissionFromPermissionGroup(permisionGroup, permission);
 ```
+## ExistInPermissionGroup()
+Checks if a permission contain inside a permission group
+```csharp
+var permission = "";
+var permissionGroup = "";
+var isExist = permission.ExistInPermissionGroup(permissionGroup, permission);
+---
 ## GetPermissionsFromPermissionGroup()
 Gives a list of permissions contained in a permission group
 ```csharp

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ExpressPermissions
 {
-    public class PermissionArgs
+    public class PermissionConfig
     {
         public string UserDBConnectionString { get; set; }
         public string PermissionDBConnectionString { get; set; }
@@ -12,5 +12,6 @@ namespace ExpressPermissions
         public string UserTable { get; set; }
         public string UserIdColumn { get; set; }
         public string UsernameColumn { get; set; }
+        public string UserFullNameQuery { get; set; }
     }
 }

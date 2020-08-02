@@ -37,6 +37,7 @@ BEGIN
 	CREATE TABLE [dbo].[tblPermissionGroups](
 		[Id] [int] IDENTITY(1,1) NOT NULL,
 		[Name] [varchar](50) NULL,
+		[Description] [varchar](MAX) NULL,
 		[Created] [datetime] NULL,
 		[Updated] [datetime] NULL,
 	 CONSTRAINT [PK_tblPermissionGroups] PRIMARY KEY CLUSTERED 

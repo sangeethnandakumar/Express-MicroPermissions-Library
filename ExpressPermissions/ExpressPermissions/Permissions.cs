@@ -203,7 +203,7 @@ namespace ExpressPermissions
                 var query = @"SELECT A.* FROM tblPermissions A
                             INNER JOIN tblPermissionBindings B ON B.PermissionId = A.Id
                             INNER JOIN "+ Config.UserDBName + ".." + Config.UserTable + @" C ON C." + Config.UserIdColumn + @"=B.UserId
-                            WHERE C.FName='" + username + "' AND A.IsEnabled=1 AND B.IsEnabled=1";
+                            WHERE C."+ Config.UsernameColumn +"='" + username + "' AND A.IsEnabled=1 AND B.IsEnabled=1";
                 var permissionInfos = SqlHelper.Query<PermissionInfo>(query, Config.PermissionDBConnectionString);
                 return permissionInfos;
             }
@@ -218,7 +218,7 @@ namespace ExpressPermissions
                 var query = @"SELECT A.* FROM tblPermissions A WHERE Id NOT IN(
                             SELECT B.PermissionId FROM tblPermissionBindings B
                             INNER JOIN "+ Config.UserDBName + ".." + Config.UserTable + @" C ON C." + Config.UserIdColumn + @"=B.UserId
-                            WHERE C.FName='" + username + @"' AND B.IsEnabled=1
+                            WHERE C."+ Config.UsernameColumn +"='" + username + @"' AND B.IsEnabled=1
                             )";
                 var permissionInfos = SqlHelper.Query<PermissionInfo>(query, Config.PermissionDBConnectionString);
                 return permissionInfos;
@@ -332,6 +332,27 @@ namespace ExpressPermissions
                 return result;
             }
             return new List<PermissionGroup>();
+        }
+
+        //List all disabled permission group
+        public IEnumerable<PermissionGroup> GetDisabledPermisionGroups(string username)
+        {
+            var result = new List<PermissionGroup>();
+            var allPermissionGroups = GetPermisionGroups();
+            var allUserPermissions = EnabledPermissions(username);
+
+            foreach(var group in allPermissionGroups)
+            {
+                var groupPermissions = GetPermissionsFromPermissionGroup(group.Name);
+
+                var intersectValues = groupPermissions.Except(allUserPermissions, new PermissionComparer()).ToList();
+
+                if (intersectValues.Count!=0)
+                {
+                    result.Add(group);
+                }
+            }
+            return result;
         }
 
         //List all permissions under a permission group

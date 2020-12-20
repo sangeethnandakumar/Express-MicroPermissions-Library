@@ -1,3 +1,16 @@
+On Startup Project Add references to
+```nuget
+Microsoft.EntityFrameworkCore.Design
+Microsoft.EntityFrameworkCore.SqlServer
+```
+
+On Lib Project Add references to
+```nuget
+Microsoft.EntityFrameworkCore
+Microsoft.EntityFrameworkCore.SqlServer
+Microsoft.EntityFrameworkCore.Tools
+```
+
 From the StartUp project, Add
 
 ```csharp
@@ -17,6 +30,11 @@ public void ConfigureServices(IServiceCollection services)
         }
 ```
 
+Migrations via PackageManager
+```cmd
+Add-Migrations MigrationName
+Update-Database
+```
 
 AddPermission(string permissionName, string description, PermissionLevel permissionLevel)
 

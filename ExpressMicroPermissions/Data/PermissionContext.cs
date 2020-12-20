@@ -12,10 +12,11 @@ namespace ExpressMicroPermissions.Data
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder builder)
-        {
-            builder.UseSqlServer(@"Server=DESKTOP-QJ02OLT\SQLEXPRESS;Database=Security;Trusted_Connection=True;");
-        }
+        public PermissionContext()
+        {}
+        public PermissionContext(DbContextOptions<PermissionContext> options) : base(options)
+        {}
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserPermission>().HasKey(c => new { c.UserId, c.PermissionId });

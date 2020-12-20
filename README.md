@@ -1,3 +1,23 @@
+From the StartUp project, Add
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+        {
+            //Set connection string for MicroPermissions Store
+            services.AddDbContext<PermissionContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("JetTask"),
+                assembly => assembly.MigrationsAssembly(typeof(PermissionContext).Assembly.FullName));
+            });
+            
+            services.AddControllersWithViews();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
+            services.AddMvc().AddRazorRuntimeCompilation();
+            services.AddLiveReload();
+        }
+```
+
+
 AddPermission(string permissionName, string description, PermissionLevel permissionLevel)
 
 RemovePermission(string permissionName)

@@ -184,19 +184,27 @@ namespace ExpressMicroPermissions
             {
                 var isPermissionGroupExist = unitOfWork.PermissionGroups.IsPermissionGroupExist(groupName);
                 var isPermissionExist = unitOfWork.Permissions.IsPermissionExist(permissionName);
-                var existingPermissions = unitOfWork.PermissionGroups.GetPermissionGroupByName(groupName).Permissions.ToList();
-                if (isPermissionGroupExist && isPermissionExist && (existingPermissions.Find(x => x.Name == permissionName) == null))
+                if(isPermissionGroupExist)
                 {
-                    var group = unitOfWork.PermissionGroups.GetPermissionGroupByName(groupName);
-                    var permission = unitOfWork.Permissions.GetPermissionByName(permissionName);
-                    group.Permissions.Add(permission);
-                    unitOfWork.Complete();
-                    return true;
+                    var existingPermissions = unitOfWork.PermissionGroups.GetPermissionGroupByName(groupName).Permissions.ToList();
+                    if (isPermissionGroupExist && isPermissionExist && (existingPermissions.Find(x => x.Name == permissionName) == null))
+                    {
+                        var group = unitOfWork.PermissionGroups.GetPermissionGroupByName(groupName);
+                        var permission = unitOfWork.Permissions.GetPermissionByName(permissionName);
+                        group.Permissions.Add(permission);
+                        unitOfWork.Complete();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
                     return false;
                 }
+                
             }
         }
 
@@ -362,7 +370,16 @@ namespace ExpressMicroPermissions
         {
             using (var unitOfWork = new UnitOfWork(new PermissionContext()))
             {
-                var permissions = unitOfWork.Permissions.GetAll().ToList();
+                var permissions = unitOfWork.Permissions.Find(x => x.IsEnabled).ToList();
+                return permissions;
+            }
+        }  
+        
+        public static List<string> GetAllPermissionGroups()
+        {
+            using (var unitOfWork = new UnitOfWork(new PermissionContext()))
+            {
+                var permissions = unitOfWork.PermissionGroups.Find(x=>x.IsEnabled).Select(x=>x.Name).ToList();
                 return permissions;
             }
         }

@@ -358,6 +358,15 @@ namespace ExpressMicroPermissions
             }
         }
 
+        public static List<Permission> GetAllPermissions()
+        {
+            List<Permission> result = new List<Permission>();
+            using (var unitOfWork = new UnitOfWork(new PermissionContext()))
+            {
+                var userPermissions = unitOfWork.Permissions.GetAll().ToList();
+                return result;
+            }
+        }
 
 
     }

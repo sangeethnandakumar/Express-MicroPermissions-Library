@@ -16,7 +16,12 @@ namespace ExpressMicroPermissions.Data
         {}
         public PermissionContext(DbContextOptions<PermissionContext> options) : base(options)
         {}
-        
+
+        protected override void OnConfiguring(DbContextOptionsBuilder builder)
+        {
+            builder.UseSqlServer(@"Server=DESKTOP-OVVQ2AQ\SQLEXPRESS;Database=JetTask;Trusted_Connection=True;");
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserPermission>().HasKey(c => new { c.UserId, c.PermissionId });
